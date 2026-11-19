@@ -154,7 +154,8 @@ def resolver_ponte_wheatstone(E=30.0, R1=20.0, R2=120.0, R3=120.0, R4=120.0,
     }
 
 
-def ajuste_minimos_quadrados(x=None, y=None, pasta=RESULTS_DIR):
+def ajuste_minimos_quadrados(x=None, y=None, pasta=RESULTS_DIR,
+                             nome_grafico="t3p3_ajustes.png"):
     if x is None:
         x = np.array([0, 1.5, 2.6, 4.2, 6.0, 8.2, 10.0, 11.4], dtype=float)
     if y is None:
@@ -200,7 +201,7 @@ def ajuste_minimos_quadrados(x=None, y=None, pasta=RESULTS_DIR):
         exp_valida = False
 
     x_dense = np.linspace(x.min(), x.max(), 200)
-    caminho = os.path.join(pasta, "t3p3_ajustes.png")
+    caminho = os.path.join(pasta, nome_grafico)
     fig, ax = plt.subplots(figsize=(9, 6))
     ax.scatter(x, y, color="black", s=60, label="Dados originais", zorder=5)
     ax.plot(x_dense, a_reta + b_reta * x_dense, "b--", label=f"Reta (erro²={erro_reta:.3f})")
@@ -233,6 +234,13 @@ def ajuste_minimos_quadrados(x=None, y=None, pasta=RESULTS_DIR):
             "observacao": "Ajuste feito em ln(y); erro² calculado em y apenas para comparação.",
         }
     return result
+
+
+# Segundo conjunto de dados para o T3.P3 (teste com novas entradas).
+# Mesmo comportamento decrescente dos dados originais, ex.: diferença de
+# temperatura (°C) de uma peça resfriando ao longo do tempo (min).
+X_T3_NOVO = np.array([0, 1, 2, 3, 4, 5, 6, 7, 8], dtype=float)
+F_T3_NOVO = np.array([25, 20, 16, 13, 10, 8, 6.5, 5, 4], dtype=float)
 
 
 def area_secao_navio(larguras=None, h=0.4, pasta=RESULTS_DIR):
@@ -298,6 +306,12 @@ def main():
         print(f"              Erro exponencial²={res3['ajuste_exponencial']['erro_quadratico']:.3f}")
     print()
 
+    res3b = ajuste_minimos_quadrados(X_T3_NOVO, F_T3_NOVO,
+                                     nome_grafico="t3p3_ajustes_novos_dados.png")
+    print(f"      T3.P3 (novos dados) — Erro reta²={res3b['ajuste_reta']['erro_quadratico']:.3f}, "
+          f"parábola²={res3b['ajuste_parabola']['erro_quadratico']:.3f}, "
+          f"exponencial²={res3b['ajuste_exponencial']['erro_quadratico']:.3f}\n")
+
     res4 = area_secao_navio()
     print(f"[4/4] T4.P3 — Área (Trapézio): {res4['metodo_trapezio']['area']:.4f} m²")
     area_s = res4["metodo_simpson"]["area"]
@@ -310,6 +324,8 @@ def main():
         "T1_P1_producao": res1,
         "T2_P1_wheatstone": res2,
         "T3_P3_minimos_quadrados": res3,
+        "T3_P3_minimos_quadrados_novos_dados": {
+            "x": X_T3_NOVO, "F(x)": F_T3_NOVO, **res3b},
         "T4_P3_area_navio": res4,
     }
 
